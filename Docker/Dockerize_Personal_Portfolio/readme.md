@@ -1,5 +1,7 @@
 # Dockerizing a Personal Portfolio
 
+> 🎥 [Mini Production Architecture with Docker — Nginx, FastAPI, Node.js Walkthrough](https://youtu.be/KURS4oPV-Do?si=jQKm_sdXNJ3btrOP)
+
 Three-tier architecture with **Nginx**, **FastAPI**, and **Node.js** — fully containerized with Docker Compose.
 
 ---
