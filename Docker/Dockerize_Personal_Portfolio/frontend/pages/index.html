@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Akash Gupta | Data Scientist</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary: #2563eb;
+      --bg: #0a0f1a;
+      --sidebar-bg: #111827;
+      --card-bg: #1a2332;
+      --card-border: #1e293b;
+      --text: #e2e8f0;
+      --text-muted: #94a3b8;
+      --border: #1e293b;
+      --accent-green: #10b981;
+      --accent-amber: #f59e0b;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    .app { display: flex; min-height: 100vh; }
+    .sidebar {
+      width: 320px; flex-shrink: 0;
+      background: var(--sidebar-bg);
+      border-right: 1px solid var(--border);
+      padding: 40px 28px;
+      position: fixed; top: 0; left: 0; bottom: 0;
+      overflow-y: auto;
+      scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+    }
+    .sidebar::-webkit-scrollbar { width: 4px; }
+    .sidebar::-webkit-scrollbar-track { background: transparent; }
+    .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+    .main { margin-left: 320px; flex: 1; min-height: 100vh; width: calc(100% - 320px); }
+
+    .sidebar .avatar {
+      width: 100px; height: 100px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), #7c3aed);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.5rem; font-weight: 800; color: #fff;
+      margin: 0 auto 20px;
+    }
+    .sidebar .name { text-align: center; font-size: 1.4rem; font-weight: 700; margin-bottom: 4px; }
+    .sidebar .title { text-align: center; color: var(--primary); font-size: 0.9rem; font-weight: 600; margin-bottom: 20px; }
+    .sidebar .divider { height: 1px; background: var(--border); margin: 20px 0; }
+
+    .sidebar .contact-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 8px 0; font-size: 0.85rem; color: var(--text-muted);
+    }
+    .sidebar .contact-item i { width: 18px; color: var(--primary); font-size: 0.9rem; text-align: center; }
+    .sidebar .contact-item a { color: var(--text-muted); text-decoration: none; transition: color 0.2s; }
+    .sidebar .contact-item a:hover { color: var(--primary); }
+
+    .sidebar .social-row { display: flex; justify-content: center; gap: 10px; margin: 16px 0; }
+    .sidebar .social-row a {
+      display: flex; align-items: center; justify-content: center;
+      width: 38px; height: 38px; border-radius: 8px;
+      font-size: 1.1rem; text-decoration: none; transition: all 0.2s;
+    }
+    .sidebar .social-row a.github { background: #333; color: #fff; }
+    .sidebar .social-row a.github:hover { background: #444; }
+    .sidebar .social-row a.linkedin { background: #0a66c2; color: #fff; }
+    .sidebar .social-row a.linkedin:hover { background: #0b74d9; }
+    .sidebar .social-row a.youtube { background: #dc2626; color: #fff; }
+    .sidebar .social-row a.youtube:hover { background: #e63946; }
+    .sidebar .social-row a.email { background: var(--card-bg); color: var(--text-muted); border: 1px solid var(--border); }
+    .sidebar .social-row a.email:hover { color: var(--primary); border-color: var(--primary); }
+
+    .sidebar .side-section { margin-bottom: 20px; }
+    .sidebar .side-section h3 {
+      font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+      color: var(--text-muted); margin-bottom: 12px;
+    }
+    .sidebar .skill-group { margin-bottom: 12px; }
+    .sidebar .skill-group h4 { font-size: 0.8rem; color: var(--primary); margin-bottom: 6px; }
+    .sidebar .skill-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+    .sidebar .skill-tags span {
+      font-size: 0.75rem; padding: 3px 10px; border-radius: 4px;
+      background: rgba(37, 99, 235, 0.08); border: 1px solid rgba(37, 99, 235, 0.15);
+      color: var(--text-muted);
+    }
+    .sidebar .edu-item { margin-bottom: 12px; }
+    .sidebar .edu-item h4 { font-size: 0.85rem; color: #fff; margin-bottom: 2px; }
+    .sidebar .edu-item p { font-size: 0.78rem; color: var(--text-muted); }
+    .sidebar .edu-item .score { color: var(--accent-green); font-weight: 600; }
+
+    .edu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .edu-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 10px; padding: 24px; }
+    .edu-card h3 { font-size: 1rem; margin-bottom: 4px; }
+    .edu-card .institute { color: var(--text-muted); font-size: 0.85rem; }
+    .edu-card .score { display: inline-block; margin-top: 10px; background: rgba(16,185,129,0.1); color: var(--accent-green); padding: 4px 12px; border-radius: 6px; font-weight: 600; font-size: 0.85rem; }
+
+    .cert-list, .award-list { list-style: none; background: var(--bg); border: 1px solid var(--card-border); border-radius: 10px; padding: 24px; }
+    .cert-list ul, .award-list ul { list-style: none; }
+    .cert-list li, .award-list li {
+      color: var(--text-muted); font-size: 0.85rem; margin-bottom: 8px;
+      padding-left: 16px; position: relative;
+    }
+    .cert-list li::before { content: '\2022'; position: absolute; left: 0; color: var(--primary); }
+    .award-list li::before { content: '\2713'; position: absolute; left: 0; color: var(--accent-green); font-weight: bold; }
+    .cert-list li:last-child, .award-list li:last-child { margin-bottom: 0; }
+
+    .main section { padding: 60px 60px; }
+    .main section:first-child { padding-top: 60px; }
+    .main .section-title {
+      font-size: 1.6rem; font-weight: 700; margin-bottom: 32px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .main .section-title i { color: var(--primary); font-size: 1.3rem; }
+
+    #about p { color: var(--text-muted); font-size: 1rem; line-height: 1.8; }
+
+    .timeline { position: relative; padding-left: 28px; }
+    .timeline::before { content: ''; position: absolute; left: 0; top: 8px; bottom: 8px; width: 2px; background: var(--border); }
+    .timeline-item { position: relative; margin-bottom: 40px; }
+    .timeline-item::before {
+      content: ''; position: absolute; left: -36px; top: 6px;
+      width: 12px; height: 12px; border-radius: 50%;
+      background: var(--primary); border: 2px solid var(--bg);
+    }
+    .timeline-item .date { color: var(--primary); font-size: 0.8rem; font-weight: 600; letter-spacing: 0.5px; }
+    .timeline-item h3 { font-size: 1.1rem; margin: 4px 0 2px; }
+    .timeline-item .company { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 10px; }
+    .timeline-item ul { list-style: none; }
+    .timeline-item li {
+      color: var(--text-muted); font-size: 0.88rem; margin-bottom: 6px;
+      padding-left: 18px; position: relative;
+    }
+    .timeline-item li::before { content: '\2022'; position: absolute; left: 0; color: var(--primary); font-weight: bold; }
+
+    .repo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .repo-card {
+      background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 10px;
+      padding: 20px; transition: all 0.2s; text-decoration: none; color: inherit; display: block;
+    }
+    .repo-card:hover { border-color: var(--primary); transform: translateY(-3px); }
+    .repo-card .repo-name { font-weight: 600; font-size: 0.95rem; color: #fff; margin-bottom: 6px; }
+    .repo-card .repo-name i { color: var(--text-muted); margin-right: 6px; font-size: 0.85rem; }
+    .repo-card .repo-desc { color: var(--text-muted); font-size: 0.82rem; margin-bottom: 10px; }
+    .repo-card .repo-meta { display: flex; gap: 14px; font-size: 0.78rem; color: var(--text-muted); }
+    .repo-card .repo-meta i { margin-right: 3px; }
+
+    .video-scroll-wrap { position: relative; }
+    .video-scroll {
+      display: flex; gap: 16px; overflow-x: auto; padding: 8px 4px 16px;
+      scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin; scrollbar-color: var(--primary) var(--border);
+    }
+    .video-scroll::-webkit-scrollbar { height: 5px; }
+    .video-scroll::-webkit-scrollbar-track { background: var(--border); border-radius: 3px; }
+    .video-scroll::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 3px; }
+    .video-scroll .video-card {
+      flex: 0 0 300px; scroll-snap-align: start;
+      background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 10px;
+      overflow: hidden; transition: transform 0.2s, border-color 0.2s;
+    }
+    .video-scroll .video-card:hover { transform: translateY(-4px); border-color: #dc2626; }
+    .video-thumb { position: relative; display: block; width: 100%; aspect-ratio: 16/9; overflow: hidden; background: #000; }
+    .video-thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
+    .video-card:hover .video-thumb img { transform: scale(1.05); }
+    .play-btn {
+      position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+      background: rgba(0,0,0,0.35); transition: background 0.2s;
+    }
+    .play-btn i { font-size: 2.5rem; color: rgba(255,255,255,0.85); filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5)); }
+    .video-card:hover .play-btn { background: rgba(0,0,0,0.5); }
+    .video-info { padding: 14px; }
+    .video-info h4 { font-size: 0.88rem; color: #fff; margin-bottom: 3px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .video-info p { font-size: 0.78rem; color: var(--text-muted); }
+
+    .main-footer { padding: 32px 48px; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.85rem; }
+
+    @media (max-width: 900px) {
+      .app { flex-direction: column; }
+      .sidebar {
+        position: static; width: 100%; border-right: none;
+        border-bottom: 1px solid var(--border);
+        padding: 28px 24px; overflow-y: visible;
+      }
+      .sidebar .avatar { width: 72px; height: 72px; font-size: 1.8rem; }
+      .main { margin-left: 0; }
+      .main section { padding: 40px 24px; }
+      .repo-grid { grid-template-columns: 1fr; }
+      .video-scroll .video-card { flex: 0 0 260px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="app">
+
+  <aside class="sidebar">
+
+    <div class="avatar">AG</div>
+    <div class="name">Akash Gupta</div>
+    <div class="title"><i class="fas fa-map-pin" style="font-size:0.75rem;margin-right:4px;"></i> Data Scientist — Kolkata</div>
+
+    <div class="social-row">
+      <a href="https://github.com/iseakash" target="_blank" class="github" aria-label="GitHub"><i class="fab fa-github"></i></a>
+      <a href="https://www.linkedin.com/in/iseakash/" target="_blank" class="linkedin" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+      <a href="https://www.youtube.com/channel/UCUAG8bMExFejl9dLbzfVI9g" target="_blank" class="youtube" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+      <a href="mailto:iseakash@gmail.com" class="email" aria-label="Email"><i class="fas fa-envelope"></i></a>
+    </div>
+
+    <div class="contact-item"><i class="fas fa-envelope"></i> <a href="mailto:iseakash@gmail.com">iseakash@gmail.com</a></div>
+    <div class="contact-item"><i class="fas fa-phone"></i> +91-9294922392</div>
+    <div class="contact-item"><i class="fas fa-graduation-cap"></i> M.Tech, IIT Kharagpur</div>
+    <div class="contact-item"><i class="fas fa-briefcase"></i> Accenture</div>
+
+    <div class="divider"></div>
+
+    <div class="side-section">
+      <h3>Skills</h3>
+      <div class="skill-group">
+        <h4>Languages</h4>
+        <div class="skill-tags"><span>Python</span><span>R</span><span>SQL</span></div>
+      </div>
+      <div class="skill-group">
+        <h4>ML & AI</h4>
+        <div class="skill-tags"><span>scikit-learn</span><span>TensorFlow</span><span>LangChain</span><span>LangGraph</span><span>Gen AI</span><span>Agentic AI</span></div>
+      </div>
+      <div class="skill-group">
+        <h4>Data</h4>
+        <div class="skill-tags"><span>NumPy</span><span>pandas</span><span>Polars</span><span>DuckDB</span><span>SQL</span><span>Power BI</span></div>
+      </div>
+      <div class="skill-group">
+        <h4>Cloud & Tools</h4>
+        <div class="skill-tags"><span>GCP Vertex AI</span><span>MLflow</span><span>Docker</span><span>Airflow</span><span>FastAPI</span><span>Git</span><span>Streamlit</span></div>
+      </div>
+      <div class="skill-group">
+        <h4>Domain</h4>
+        <div class="skill-tags"><span>Supply Chain</span><span>Manufacturing</span><span>Demand Forecasting</span><span>Digital Twin</span></div>
+      </div>
+    </div>
+
+  </aside>
+
+  <main class="main">
+
+    <section id="about">
+      <h2 class="section-title"><i class="fas fa-user"></i> About Me</h2>
+      <p>Data scientist with 6+ years of experience across manufacturing and FMCG, combining strong domain expertise with stakeholder collaboration & data storytelling to drive end-to-end solutions improving efficiency and reducing waste. Skilled in advanced analytics, statistical modeling, optimization, machine learning, Gen AI, and Agentic AI with proven expertise in translating complex data into decision-making insights, with proficiency in Python, SQL, Cloud platforms.</p>
+    </section>
+
+    <section id="experience" style="background:var(--card-bg);">
+      <h2 class="section-title"><i class="fas fa-briefcase"></i> Experience</h2>
+      <div class="timeline">
+
+        <div class="timeline-item">
+          <div class="date">Sep 2024 — Present</div>
+          <h3>Decision Scientist</h3>
+          <div class="company">Accenture — Kolkata, India</div>
+          <ul>
+            <li><strong>Bleeder Prediction:</strong> Hybrid ML (Random Forest) + rule-based system for harmful gas emission prediction in steel plants — reduced false positives, cut 60% emissions penalty, ~$3M annual savings.</li>
+            <li><strong>Supplier Analytics Agentic Solution:</strong> Built Agentic AI platform using LangGraph + Gemini LLMs with RAG (ChromaDB), SQL summarization & ML models — 85% accuracy, 40% faster decisions.</li>
+            <li><strong>Contract Negotiation:</strong> LLM-powered assistant using Neo4j knowledge graphs & ChromaDB RAG — 300+ dialogues generated, 40% better insights, ~$500K annual savings.</li>
+            <li><strong>Upstream Logistics:</strong> Long-range demand forecasting & optimal vessel routing — reduced charter costs by 25%, 80% forecast accuracy with Pyomo + Gurobi optimization.</li>
+          </ul>
+        </div>
+
+        <div class="timeline-item">
+          <div class="date">Mar 2022 — Aug 2024</div>
+          <h3>Senior Analyst</h3>
+          <div class="company">General Mills India</div>
+          <ul>
+            <li><strong>Cascading Fault Analysis:</strong> Decision Tree regression (R² ~ 0.50) to predict pizza quality — reduced rejection rate by 30-40%, ~$2M annual savings.</li>
+            <li><strong>Production Downtime Reduction:</strong> Random Forest classification (F1 ~ 0.45) on GCP Vertex AI — reduced downtime by 20%, ~$1M annual savings.</li>
+            <li><strong>Food & Waste Reduction:</strong> Scalable ETL + digital twin framework with DuckDB, Polars, Dagster — 10x faster processing, ~$2K daily savings.</li>
+            <li><strong>Data Profiling App:</strong> Automated sensor health monitoring with DBSCAN clustering on 10,000+ sensors — saved 5,000+ engineering hours.</li>
+          </ul>
+        </div>
+
+        <div class="timeline-item">
+          <div class="date">Jul 2019 — Mar 2022</div>
+          <h3>Senior Engineer</h3>
+          <div class="company">John Deere India</div>
+          <ul>
+            <li><strong>Defect Analysis:</strong> Hybrid NLP model (Naive Bayes 93% accuracy) + Apriori algorithm to categorize quality issues & diagnose root causes — $93K cost reduction.</li>
+            <li><strong>Intelligent Assistance System:</strong> Centralized utility for defect-free manufacturing planning with Power BI dashboards — reduced manual effort by 70%.</li>
+            <li><strong>Vision System:</strong> CNN-based image classification for missing parts in multi-model engines — 85% accuracy, reduced 5,000 process defects.</li>
+          </ul>
+        </div>
+
+      </div>
+    </section>
+
+    <section id="projects">
+      <h2 class="section-title"><i class="fab fa-github"></i> GitHub Projects</h2>
+      <div class="repo-grid">
+        <a href="https://github.com/iseakash/Regression-Model-Selection" target="_blank" class="repo-card">
+          <div class="repo-name"><i class="fas fa-book"></i> Regression-Model-Selection</div>
+          <div class="repo-desc">Automated regression model selection and evaluation pipeline.</div>
+          <div class="repo-meta"><span><i class="fas fa-star"></i> 1</span><span><i class="fas fa-code"></i> Jupyter</span></div>
+        </a>
+        <a href="https://github.com/iseakash/Tumour-Classification-to-predict-breast-cancer" target="_blank" class="repo-card">
+          <div class="repo-name"><i class="fas fa-book"></i> Tumour-Classification</div>
+          <div class="repo-desc">Breast cancer prediction using advanced classification techniques.</div>
+          <div class="repo-meta"><span><i class="fas fa-star"></i> 1</span><span><i class="fas fa-code"></i> Jupyter</span></div>
+        </a>
+        <a href="https://github.com/iseakash/Clustering-on-Mall-Customers-Data" target="_blank" class="repo-card">
+          <div class="repo-name"><i class="fas fa-book"></i> Customer Segmentation</div>
+          <div class="repo-desc">K-means and Hierarchical Clustering for customer segments.</div>
+          <div class="repo-meta"><span><i class="fas fa-star"></i> 1</span><span><i class="fas fa-code"></i> Jupyter</span></div>
+        </a>
+        <a href="https://github.com/iseakash/Loan-Prediction-Problem" target="_blank" class="repo-card">
+          <div class="repo-name"><i class="fas fa-book"></i> Loan-Prediction</div>
+          <div class="repo-desc">Predict loan eligibility — Analytics Vidhya problem.</div>
+          <div class="repo-meta"><span><i class="fas fa-star"></i> 1</span><span><i class="fas fa-code"></i> Jupyter</span></div>
+        </a>
+        <a href="https://github.com/iseakash/Logistic-Regression-with-Python-and-Numpy" target="_blank" class="repo-card">
+          <div class="repo-name"><i class="fas fa-book"></i> Logistic-Regression</div>
+          <div class="repo-desc">Logistic regression from scratch with Python and NumPy.</div>
+          <div class="repo-meta"><span><i class="fas fa-star"></i> 1</span><span><i class="fas fa-code"></i> Jupyter</span></div>
+        </a>
+        <a href="https://github.com/iseakash/Big-Mart-Sales-Prediction" target="_blank" class="repo-card">
+          <div class="repo-name"><i class="fas fa-book"></i> Big-Mart-Sales</div>
+          <div class="repo-desc">Sales prediction model for Big Mart outlets.</div>
+          <div class="repo-meta"><span><i class="fas fa-star"></i> 1</span><span><i class="fas fa-code"></i> Jupyter</span></div>
+        </a>
+      </div>
+      <div style="text-align:center;margin-top:20px;">
+        <a href="https://github.com/iseakash?tab=repositories" target="_blank" style="display:inline-flex;align-items:center;gap:8px;color:var(--primary);font-weight:600;text-decoration:none;font-size:0.9rem;">
+          View all 36+ repositories <i class="fas fa-arrow-right" style="font-size:0.8rem;"></i>
+        </a>
+      </div>
+    </section>
+
+    <section id="media" style="background:var(--card-bg);">
+      <h2 class="section-title"><i class="fab fa-youtube"></i> YouTube — AkashThing</h2>
+      <div class="youtube-header" style="text-align:center;margin-bottom:28px;">
+        <p style="color:var(--text-muted);margin-bottom:14px;font-size:0.9rem;">Docker, Git, Python, and Data Science tutorials for developers</p>
+        <a href="https://www.youtube.com/channel/UCUAG8bMExFejl9dLbzfVI9g" target="_blank" style="display:inline-flex;align-items:center;gap:8px;background:#dc2626;color:#fff;padding:10px 24px;border-radius:8px;text-decoration:none;font-weight:600;font-size:0.9rem;transition:background 0.2s;"><i class="fab fa-youtube"></i> Visit My Channel</a>
+      </div>
+      <div class="video-scroll-wrap">
+        <div class="video-scroll">
+          <div class="video-card">
+            <a href="https://www.youtube.com/watch?v=sKqk45k2heI" target="_blank" class="video-thumb">
+              <img src="https://i4.ytimg.com/vi/sKqk45k2heI/hqdefault.jpg" alt="Dockerize a Python App">
+              <span class="play-btn"><i class="fas fa-play"></i></span>
+            </a>
+            <div class="video-info">
+              <h4>Dockerize a Python App from Scratch</h4>
+              <p>Build, Run & Understand docker run -it · 6 views</p>
+            </div>
+          </div>
+          <div class="video-card">
+            <a href="https://www.youtube.com/watch?v=M4uVLxk2QTE" target="_blank" class="video-thumb">
+              <img src="https://i2.ytimg.com/vi/M4uVLxk2QTE/hqdefault.jpg" alt="Docker Commands Cheat Sheet">
+              <span class="play-btn"><i class="fas fa-play"></i></span>
+            </a>
+            <div class="video-info">
+              <h4>Docker Commands Cheat Sheet</h4>
+              <p>Images, Containers & Dockerfile · 14 views</p>
+            </div>
+          </div>
+          <div class="video-card">
+            <a href="https://www.youtube.com/watch?v=IDnX2HbPW1Y" target="_blank" class="video-thumb">
+              <img src="https://i2.ytimg.com/vi/IDnX2HbPW1Y/hqdefault.jpg" alt="Install Docker Desktop">
+              <span class="play-btn"><i class="fas fa-play"></i></span>
+            </a>
+            <div class="video-info">
+              <h4>How to Install Docker Desktop & Use Docker Hub</h4>
+              <p>Step by Step · 18 views</p>
+            </div>
+          </div>
+          <div class="video-card">
+            <a href="https://www.youtube.com/watch?v=HmwBrKVe9Vo" target="_blank" class="video-thumb">
+              <img src="https://i1.ytimg.com/vi/HmwBrKVe9Vo/hqdefault.jpg" alt="Docker Basics">
+              <span class="play-btn"><i class="fas fa-play"></i></span>
+            </a>
+            <div class="video-info">
+              <h4>Docker Basics in 15 Min</h4>
+              <p>What It Is, How It Works & Why You Need It · 27 views</p>
+            </div>
+          </div>
+          <div class="video-card">
+            <a href="https://www.youtube.com/watch?v=dxJ0IiBQfbo" target="_blank" class="video-thumb">
+              <img src="https://i1.ytimg.com/vi/dxJ0IiBQfbo/hqdefault.jpg" alt="Git and GitHub Guide">
+              <span class="play-btn"><i class="fas fa-play"></i></span>
+            </a>
+            <div class="video-info">
+              <h4>Git & GitHub Practical Guide</h4>
+              <p>Commands + Push Workflow · 114 views</p>
+            </div>
+          </div>
+          <div class="video-card">
+            <a href="https://www.youtube.com/watch?v=VTQPrxeLXMU" target="_blank" class="video-thumb">
+              <img src="https://i3.ytimg.com/vi/VTQPrxeLXMU/hqdefault.jpg" alt="Git and GitHub Explained">
+              <span class="play-btn"><i class="fas fa-play"></i></span>
+            </a>
+            <div class="video-info">
+              <h4>Git & GitHub Explained</h4>
+              <p>Key Differences You Must Know · 77 views</p>
+            </div>
+          </div>
+          <div class="video-card">
+            <a href="https://www.youtube.com/watch?v=Uqkd2lholuo" target="_blank" class="video-thumb">
+              <img src="https://i2.ytimg.com/vi/Uqkd2lholuo/hqdefault.jpg" alt="VS Code Installation">
+              <span class="play-btn"><i class="fas fa-play"></i></span>
+            </a>
+            <div class="video-info">
+              <h4>VS Code Installation Tutorial</h4>
+              <p>Why Use VS Code + Extensions · 41 views</p>
+            </div>
+          </div>
+          <div class="video-card">
+            <a href="https://www.youtube.com/watch?v=SjEYm83fIYY" target="_blank" class="video-thumb">
+              <img src="https://i4.ytimg.com/vi/SjEYm83fIYY/hqdefault.jpg" alt="Python Installation">
+              <span class="play-btn"><i class="fas fa-play"></i></span>
+            </a>
+            <div class="video-info">
+              <h4>Python Installation & Setup in VS Code</h4>
+              <p>Windows · Beginner Friendly · 71 views</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p style="text-align:center;margin-top:12px;color:var(--text-muted);font-size:0.85rem;"><i class="fas fa-arrow-left"></i> Scroll to browse videos <i class="fas fa-arrow-right"></i></p>
+    </section>
+
+    <section id="education">
+      <h2 class="section-title"><i class="fas fa-graduation-cap"></i> Education</h2>
+      <div class="edu-grid">
+        <div class="edu-card">
+          <h3>M.Tech — Industrial Engineering & Management</h3>
+          <p class="institute">IIT Kharagpur</p>
+          <span class="score">CGPA: 9.01</span>
+          <p style="color:var(--text-muted);font-size:0.8rem;margin-top:4px;">2019</p>
+        </div>
+        <div class="edu-card">
+          <h3>B.Tech — Mechanical Engineering</h3>
+          <p class="institute">Aryabhatta Knowledge University</p>
+          <span class="score">CGPA: 9.03</span>
+          <p style="color:var(--text-muted);font-size:0.8rem;margin-top:4px;">2017</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="certifications" style="background:var(--card-bg);">
+      <h2 class="section-title"><i class="fas fa-award"></i> Certifications & Awards</h2>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+        <div class="cert-list">
+          <h3 style="font-size:1rem;margin-bottom:14px;display:flex;align-items:center;gap:8px;"><i class="fas fa-certificate" style="color:var(--accent-amber);"></i> Certifications</h3>
+          <ul>
+            <li>Gen AI with LLM — Andrew Ng | Coursera</li>
+            <li>ML Masters & DL Masters — ineuron.ai</li>
+            <li>Machine Learning — Andrew Ng | Coursera</li>
+            <li>ML Scientist with Python — DataCamp</li>
+            <li>Data Analyst in SQL — DataCamp</li>
+            <li>Database Design — DataCamp</li>
+            <li>Introduction to Databricks — Databricks</li>
+          </ul>
+        </div>
+        <div class="award-list">
+          <h3 style="font-size:1rem;margin-bottom:14px;display:flex;align-items:center;gap:8px;"><i class="fas fa-trophy" style="color:var(--accent-amber);"></i> Awards</h3>
+          <ul>
+            <li>Core Value Champion — Q3 FY25 & Q1 FY26 (Accenture)</li>
+            <li>Rookie of the Quarter — General Mills</li>
+            <li>Skydiver Award — General Mills</li>
+            <li>Commendable Contribution Award Nominee — John Deere</li>
+            <li>SME for Data Analytics & Data Science — John Deere</li>
+            <li>On-site assignment in Mannheim, Germany — John Deere</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="contact">
+      <h2 class="section-title"><i class="fas fa-paper-plane"></i> Get in Touch</h2>
+      <div id="contact-root"></div>
+    </section>
+
+    <div class="main-footer">
+      <p>&copy; 2026 Akash Gupta. Built with <i class="fas fa-heart" style="color:#dc2626;"></i></p>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+</script>
+
+<script type="text/babel">
+  const inputStyle = {
+    width:'100%', padding:'12px', borderRadius:'8px', border:'1px solid var(--border)',
+    background:'var(--bg)', color:'var(--text)', fontSize:'0.9rem', outline:'none',
+    fontFamily:'inherit'
+  };
+
+  function ContactForm() {
+    const [form, setForm] = React.useState({name:'', email:'', message:''});
+    const [status, setStatus] = React.useState('idle');
+    const [responseMsg, setResponseMsg] = React.useState('');
+    const handleChange = e => setForm({...form, [e.target.name]: e.target.value});
+    const handleSubmit = e => {
+      e.preventDefault();
+      setStatus('loading');
+      fetch('/api/contact', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify(form)
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.message) {
+            setStatus('success');
+            setResponseMsg(data.message);
+            setForm({name:'', email:'', message:''});
+          } else {
+            setStatus('error');
+            setResponseMsg(data.error || 'Something went wrong.');
+          }
+        })
+        .catch(() => { setStatus('error'); setResponseMsg('Network error. Please try again.'); });
+    };
+    if (status === 'success') {
+      return (
+        <div style={{textAlign:'center', padding:'40px 0'}}>
+          <i className="fas fa-check-circle" style={{fontSize:'3rem', color:'var(--accent-green)', marginBottom:'16px'}}></i>
+          <p style={{color:'#fff', fontSize:'1.1rem', fontWeight:600}}>{responseMsg}</p>
+        </div>
+      );
+    }
+    return (
+      <form onSubmit={handleSubmit} style={{maxWidth:'500px', margin:'0 auto'}}>
+        <div style={{marginBottom:'16px'}}>
+          <input type="text" name="name" placeholder="Your Name" value={form.name}
+            onChange={handleChange} required style={inputStyle} />
+        </div>
+        <div style={{marginBottom:'16px'}}>
+          <input type="email" name="email" placeholder="Your Email" value={form.email}
+            onChange={handleChange} required style={inputStyle} />
+        </div>
+        <div style={{marginBottom:'16px'}}>
+          <textarea name="message" placeholder="Your Message" rows="5" value={form.message}
+            onChange={handleChange} required style={{...inputStyle, resize:'vertical'}}></textarea>
+        </div>
+        <button type="submit" disabled={status==='loading'}
+          style={{
+            width:'100%', padding:'12px', border:'none', borderRadius:'8px',
+            background:'var(--primary)', color:'#fff', fontWeight:600, fontSize:'1rem',
+            cursor:'pointer', opacity: status==='loading' ? 0.6 : 1
+          }}>
+          {status === 'loading' ? 'Sending...' : 'Send Message'}
+        </button>
+        {status === 'error' && (
+          <p style={{color:'#ef4444', textAlign:'center', marginTop:'12px'}}>{responseMsg}</p>
+        )}
+      </form>
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById('contact-root')).render(<ContactForm />);
+</script>
+</body>
+</html>
