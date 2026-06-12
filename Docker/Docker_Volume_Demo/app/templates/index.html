@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daily Sales Tracker</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 700px; margin: 40px auto; padding: 0 20px; background: #f5f5f5; }
+    h1 { text-align: center; margin-bottom: 24px; color: #333; }
+    .card { background: #fff; border-radius: 8px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px; }
+    .form-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: end; }
+    .form-group { display: flex; flex-direction: column; flex: 1; min-width: 120px; }
+    label { font-size: 13px; color: #555; margin-bottom: 4px; }
+    input { padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; }
+    button { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; color: #fff; }
+    .btn-add { background: #28a745; }
+    .btn-refresh { background: #007bff; }
+    .btn-delete { background: #dc3545; }
+    .btn-add:hover { background: #218838; }
+    .btn-refresh:hover { background: #0069d9; }
+    .btn-delete:hover { background: #c82333; }
+    .toolbar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid #eee; }
+    th { background: #f8f9fa; font-weight: 600; color: #555; }
+    .empty { text-align: center; color: #999; padding: 32px; }
+    .status { text-align: center; padding: 10px; border-radius: 4px; margin-top: 12px; display: none; }
+    .status.success { background: #d4edda; color: #155724; display: block; }
+    .status.error { background: #f8d7da; color: #721c24; display: block; }
+  </style>
+</head>
+<body>
+  <h1>Daily Sales Tracker</h1>
+
+  <div class="card">
+    <h3>Add Sale</h3>
+    <div class="form-row">
+      <div class="form-group">
+        <label for="saleDate">Date</label>
+        <input type="date" id="saleDate">
+      </div>
+      <div class="form-group">
+        <label for="product">Product</label>
+        <input type="text" id="product" placeholder="e.g. Notebook">
+      </div>
+      <div class="form-group">
+        <label for="amount">Amount ($)</label>
+        <input type="number" id="amount" step="0.01" placeholder="0.00">
+      </div>
+      <button class="btn-add" onclick="addSale()">Add Sale</button>
+    </div>
+    <div id="addStatus" class="status"></div>
+  </div>
+
+  <div class="card">
+    <div class="toolbar">
+      <button class="btn-refresh" onclick="loadSales()">Refresh</button>
+      <button class="btn-delete" onclick="deleteAll()">Delete All</button>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Date</th>
+          <th>Product</th>
+          <th>Amount</th>
+        </tr>
+      </thead>
+      <tbody id="salesBody"></tbody>
+    </table>
+    <div id="deleteStatus" class="status"></div>
+  </div>
+
+  <script>
+    async function loadSales() {
+      const res = await fetch("/api/sales");
+      const sales = await res.json();
+      const tbody = document.getElementById("salesBody");
+      if (sales.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" class="empty">No sales yet. Add your first sale above!</td></tr>';
+        return;
+      }
+      tbody.innerHTML = sales.map(s => `<tr>
+          <td>${s.id}</td>
+          <td>${s.sale_date}</td>
+          <td>${s.product}</td>
+          <td>$${parseFloat(s.amount).toFixed(2)}</td>
+        </tr>`).join("");
+    }
+
+    async function addSale() {
+      const saleDate = document.getElementById("saleDate").value;
+      const product = document.getElementById("product").value.trim();
+      const amount = document.getElementById("amount").value;
+      const status = document.getElementById("addStatus");
+
+      if (!saleDate || !product || !amount) {
+        status.className = "status error";
+        status.textContent = "Please fill in all fields";
+        return;
+      }
+
+      const res = await fetch("/api/sales", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sale_date: saleDate, product, amount })
+      });
+
+      if (res.ok) {
+        status.className = "status success";
+        status.textContent = "Sale added successfully!";
+        document.getElementById("saleDate").value = "";
+        document.getElementById("product").value = "";
+        document.getElementById("amount").value = "";
+        loadSales();
+      } else {
+        status.className = "status error";
+        status.textContent = "Failed to add sale";
+      }
+    }
+
+    async function deleteAll() {
+      if (!confirm("Delete all sales?")) return;
+      await fetch("/api/sales", { method: "DELETE" });
+      document.getElementById("deleteStatus").className = "status success";
+      document.getElementById("deleteStatus").textContent = "All sales deleted";
+      loadSales();
+    }
+
+    loadSales();
+  </script>
+</body>
+</html>

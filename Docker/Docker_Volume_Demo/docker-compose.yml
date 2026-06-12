@@ -1,0 +1,29 @@
+﻿services:
+  db:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: sales_db
+    ports:
+      - "3306:3306"
+    # === PART 2: Uncomment the lines below to enable persistence ===
+    volumes:
+      - sales_data:/var/lib/mysql
+
+  app:
+    build: ./app
+    ports:
+      - "5000:5000"
+    environment:
+      DB_HOST: db
+      DB_USER: root
+      DB_PASSWORD: rootpassword
+      DB_NAME: sales_db
+    depends_on:
+      - db
+
+# === PART 2: Uncomment the lines below to enable persistence ===
+# In Docker Compose, named volumes must be explicitly declared at the top level.
+# Without it, volumes: - sales_data:/var/lib/mysql would cause an error because Compose doesn't know sales_data is a volume.
+volumes:
+  sales_data:
