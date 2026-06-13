@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Employee Management System — Docker Compose</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:#0a0f1a;color:#e2e8f0;font-family:Inter,sans-serif;overflow:hidden;display:flex;flex-direction:column}
+.slides{flex:1;position:relative;overflow:hidden}
+.slide{position:absolute;inset:0;padding:48px 64px;overflow-y:auto;display:flex;flex-direction:column;justify-content:center;opacity:0;visibility:hidden;transition:opacity .45s ease,transform .45s ease;transform:translateY(18px);-webkit-overflow-scrolling:touch}
+.slide.active{opacity:1;visibility:visible;transform:translateY(0);z-index:1}
+.slide-content{max-width:1040px;width:100%;margin:0 auto}
+h1{font-size:2.6rem;font-weight:800;line-height:1.2;margin-bottom:12px}
+h2{font-size:1.6rem;font-weight:700;margin-bottom:16px;color:#f1f5f9}
+h3{font-size:1.15rem;font-weight:600;margin-bottom:8px;color:#cbd5e1}
+p,li{font-size:1rem;line-height:1.65;color:#cbd5e1}
+code{font-family:'JetBrains Mono',monospace;font-size:.875rem}
+pre{background:#0f172a;border:1px solid #1e293b;border-radius:10px;padding:18px 20px;overflow-x:auto;margin:12px 0}
+pre code{color:#e2e8f0;white-space:pre}
+a{color:#60a5fa;text-decoration:none}
+ul{list-style:none;padding:0}
+li{position:relative;padding-left:22px;margin-bottom:6px}
+li::before{content:"▸";position:absolute;left:0;color:#60a5fa;font-weight:700}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.card{background:#111827;border:1px solid #1e293b;border-radius:12px;padding:20px;transition:transform .25s ease,box-shadow .25s ease}
+.card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.35)}
+.card h3{margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.card h3 i{color:#60a5fa;width:20px;text-align:center}
+.card p{font-size:.9rem;margin-bottom:4px}
+.badge{display:inline-block;background:#1e293b;color:#94a3b8;font-size:.75rem;font-weight:500;padding:3px 10px;border-radius:20px;font-family:'JetBrains Mono',monospace;border:1px solid #334155}
+.badge.blue{background:#1e3a5f;color:#60a5fa;border-color:#2563eb}
+.badge.green{background:#14331e;color:#34d399;border-color:#16a34a}
+.badge.amber{background:#332b10;color:#fbbf24;border-color:#d97706}
+.arch-wrap{display:flex;flex-direction:column;align-items:center;gap:10px;margin:8px 0}
+.arch-row{display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap}
+.arch-box{background:#0f172a;border:1.5px solid #1e293b;border-radius:12px;padding:14px 22px;text-align:center;min-width:140px;transition:all .25s ease;position:relative}
+.arch-box:hover{border-color:#334155;transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.3)}
+.arch-box .icon{font-size:1.3rem;display:block;margin-bottom:4px}
+.arch-box .label{font-size:.85rem;font-weight:600;color:#f1f5f9}
+.arch-box .port{font-size:.7rem;color:#64748b;font-family:'JetBrains Mono',monospace;margin-top:3px}
+.arch-box.nginx{border-color:#2563eb;background:#0f172a}
+.arch-box.nginx .icon{color:#60a5fa}
+.arch-box.frontend{border-color:#34d399;background:#0f172a}
+.arch-box.frontend .icon{color:#34d399}
+.arch-box.backend{border-color:#fbbf24;background:#0f172a}
+.arch-box.backend .icon{color:#fbbf24}
+.arch-box.db{border-color:#f87171;background:#0f172a}
+.arch-box.db .icon{color:#f87171}
+.arch-arrow{color:#334155;font-size:1.1rem;padding:0 4px}
+.arch-arrow.active{color:#60a5fa}
+.arch-sublabel{font-size:.72rem;color:#64748b;font-family:'JetBrains Mono',monospace;margin-top:2px;background:#111827;padding:2px 8px;border-radius:4px;display:inline-block}
+.arch-line{width:2px;height:20px;background:#1e293b;margin:2px 0}
+.arch-bracket{color:#1e293b;font-size:1.4rem;font-weight:100;letter-spacing:-2px}
+.diagram{background:#0f172a;border:1px solid #1e293b;border-radius:10px;padding:18px 20px;font-family:'JetBrains Mono',monospace;font-size:.8rem;line-height:1.6;white-space:pre;overflow-x:auto;margin:12px 0}
+.diagram .hl{color:#60a5fa}
+.diagram .hl2{color:#34d399}
+.diagram .hl3{color:#fbbf24}
+.state-row{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
+.state-badge{display:flex;align-items:center;gap:6px;background:#111827;border:1px solid #1e293b;border-radius:8px;padding:6px 14px;font-size:.82rem;font-family:'JetBrains Mono',monospace}
+.state-badge i{font-size:.7rem;color:#34d399}
+.title-gradient{background:linear-gradient(135deg,#60a5fa,#a78bfa,#f472b6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.subtitle{font-size:1.05rem;color:#94a3b8;margin-bottom:20px}
+.medium-text{font-size:.95rem;color:#94a3b8}
+.small-text{font-size:.82rem;color:#64748b}
+.mt-8{margin-top:8px}
+.mt-16{margin-top:16px}
+.mt-24{margin-top:24px}
+.mb-8{margin-bottom:8px}
+.mb-16{margin-bottom:16px}
+.flex-center{display:flex;align-items:center;justify-content:center}
+.gap-8{gap:8px}
+.gap-12{gap:12px}
+.table-wrap{overflow-x:auto;margin:12px 0}
+table{width:100%;border-collapse:collapse;font-size:.88rem}
+th{background:#0f172a;color:#94a3b8;font-weight:600;padding:10px 14px;text-align:left;border-bottom:2px solid #1e293b;text-transform:uppercase;letter-spacing:.5px;font-size:.72rem}
+td{padding:9px 14px;border-bottom:1px solid #1e293b;color:#cbd5e1}
+tr:hover td{background:#111827}
+.diagram-box{border:1px solid #1e293b;border-radius:12px;padding:18px;background:#0f172a;margin:12px 0;position:relative;overflow:hidden}
+.diagram-box::before{content:'';position:absolute;inset:0;border-radius:12px;border:1px solid transparent;transition:border-color .6s ease}
+.diagram-inner{font-family:'JetBrains Mono',monospace;font-size:.78rem;line-height:1.55;white-space:pre}
+.icon-list{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.icon-list li{padding-left:0}
+.icon-list li::before{display:none}
+.icon-list li i{color:#60a5fa;width:22px;text-align:center;margin-right:6px}
+.navbar{background:#0f172a;border-top:1px solid #1e293b;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;z-index:10}
+.navbar .counter{font-size:.85rem;color:#64748b;font-family:'JetBrains Mono',monospace}
+.nav-btn{background:transparent;border:1px solid #1e293b;color:#94a3b8;padding:8px 18px;border-radius:8px;cursor:pointer;font-size:.88rem;transition:all .2s;display:flex;align-items:center;gap:6px;font-family:Inter,sans-serif}
+.nav-btn:hover:not(:disabled){background:#1e293b;color:#e2e8f0;border-color:#334155}
+.nav-btn:disabled{opacity:.35;cursor:default}
+.nav-btn i{font-size:.85rem}
+
+/* Animations */
+.slide.animate h1,.slide.animate h2,.slide.animate .subtitle{animation:fadeInUp .6s ease both}
+.slide.animate p{animation:fadeInUp .55s ease both}
+.slide.animate li{animation:fadeInUp .5s ease both}
+.slide.animate li:nth-child(1){animation-delay:0s}
+.slide.animate li:nth-child(2){animation-delay:.07s}
+.slide.animate li:nth-child(3){animation-delay:.14s}
+.slide.animate li:nth-child(4){animation-delay:.21s}
+.slide.animate li:nth-child(5){animation-delay:.28s}
+.slide.animate li:nth-child(6){animation-delay:.35s}
+.slide.animate li:nth-child(7){animation-delay:.42s}
+.slide.animate li:nth-child(8){animation-delay:.49s}
+.slide.animate .card{animation:scaleIn .45s ease both}
+.slide.animate .card:nth-child(1){animation-delay:0s}
+.slide.animate .card:nth-child(2){animation-delay:.08s}
+.slide.animate .card:nth-child(3){animation-delay:.16s}
+.slide.animate .card:nth-child(4){animation-delay:.24s}
+.slide.animate .diagram,.slide.animate .diagram-box,.slide.animate pre{animation:scaleIn .5s ease both}
+.slide.animate .badge{animation:badgePop .45s ease both}
+.slide.animate .state-badge{animation:badgePop .4s ease both}
+.slide.animate .arch-box{animation:scaleIn .45s ease both}
+.slide.animate h1.title-gradient{animation:shimmer 3s ease infinite both}
+@keyframes fadeInUp{0%{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeInDown{0%{opacity:0;transform:translateY(-18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeInLeft{0%{opacity:0;transform:translateX(-24px)}to{opacity:1;transform:translateX(0)}}
+@keyframes fadeInRight{0%{opacity:0;transform:translateX(24px)}to{opacity:1;transform:translateX(0)}}
+@keyframes scaleIn{0%{opacity:0;transform:scale(.92)}to{opacity:1;transform:scale(1)}}
+@keyframes badgePop{0%{opacity:0;transform:scale(.7)}60%{transform:scale(1.08)}to{opacity:1;transform:scale(1)}}
+@keyframes shimmer{0%,to{background-position:0 50%}50%{background-position:100% 50%}}
+.title-gradient{background-size:200% auto}
+@keyframes clipReveal{0%{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+.slide.animate .diagram-box::before{animation:clipReveal .7s ease both}
+.slide.animate pre code,.slide.animate li code{overflow:hidden;white-space:pre-wrap;animation:fadeInUp 1.5s ease both}
+@keyframes borderGlow{0%{border-color:#60a5fa}25%{border-color:#34d399}50%{border-color:#fbbf24}75%{border-color:#a78bfa}to{border-color:#60a5fa}}
+.slide.animate pre,.slide.animate .diagram,.slide.animate .diagram-box,.slide.animate table,.slide.animate th{border-color:#1e293b;animation:scaleIn .5s ease both,borderGlow 4s ease-in-out .3s infinite both}
+.slide.animate .card,.slide.animate .arch-box{border-color:#1e293b;animation:scaleIn .45s ease both,borderGlow 4s ease-in-out .3s infinite both}
+.slide.animate .state-badge{border-color:#1e293b;animation:badgePop .4s ease both,borderGlow 4s ease-in-out .3s infinite both}
+.slide[data-index="1"].animate .diagram:first-of-type{border-color:#1e293b;animation:fadeInLeft 1.5s ease both,borderGlow 4s ease-in-out .3s infinite both}
+
+@media(max-width:768px){
+.slide{padding:24px 20px}
+h1{font-size:1.6rem}
+h2{font-size:1.2rem}
+.grid-2,.icon-list{grid-template-columns:1fr}
+.navbar{padding:10px 14px;flex-wrap:wrap;gap:8px}
+pre,.diagram{font-size:.72rem;padding:12px}
+.diagram-inner{font-size:.65rem}
+}
+</style>
+</head>
+<body>
+
+<div class="slides" id="slides">
+
+<!-- Slide 1: Title -->
+<div class="slide active" data-index="0">
+  <div class="slide-content" style="text-align:center">
+    <div class="mb-16"><span class="badge blue" style="font-size:.85rem;padding:6px 18px"><i class="fas fa-docker" style="margin-right:6px"></i> Docker Compose</span></div>
+    <h1 class="title-gradient" style="font-size:2.8rem">Build a Multi-Container<br>Employee Management System</h1>
+    <p class="subtitle mt-16" style="font-size:1.1rem">Frontend <i class="fas fa-arrow-right" style="margin:0 8px;color:#334155"></i> Nginx <i class="fas fa-arrow-right" style="margin:0 8px;color:#334155"></i> Backend <i class="fas fa-arrow-right" style="margin:0 8px;color:#334155"></i> PostgreSQL</p>
+    <div class="state-row flex-center gap-12 mt-24" style="justify-content:center">
+      <span class="state-badge"><i class="fas fa-circle" style="color:#34d399"></i> Next.js + React</span>
+      <span class="state-badge"><i class="fas fa-circle" style="color:#34d399"></i> FastAPI + Python</span>
+      <span class="state-badge"><i class="fas fa-circle" style="color:#34d399"></i> PostgreSQL</span>
+      <span class="state-badge"><i class="fas fa-circle" style="color:#34d399"></i> Nginx Proxy</span>
+    </div>
+    <p class="small-text mt-24" style="color:#475569">Press <span class="badge" style="margin:0 4px">←</span> <span class="badge" style="margin:0 4px">→</span> or click arrows to navigate</p>
+  </div>
+</div>
+
+<!-- Slide 2: What We Built -->
+<div class="slide" data-index="1">
+  <div class="slide-content">
+    <h2><i class="fas fa-cubes" style="color:#60a5fa;margin-right:10px"></i> What We Built</h2>
+    <p class="subtitle">4 Docker containers working together as one application</p>
+    <div class="grid-2 mt-16">
+      <div class="card"><h3><i class="fas fa-code"></i> Frontend</h3><p>Next.js + React UI for managing employees. Full CRUD: add, edit, delete, view.</p><span class="badge blue mt-8">Port 3000</span></div>
+      <div class="card"><h3><i class="fas fa-server"></i> Backend</h3><p>FastAPI Python REST API with 5 endpoints. CORS-enabled. Parameterized queries for safety.</p><span class="badge blue mt-8">Port 5000</span></div>
+      <div class="card"><h3><i class="fas fa-database"></i> Database</h3><p>PostgreSQL 16 with persistent volume. Employee table with auto-generated IDs and timestamps.</p><span class="badge blue mt-8">Port 5432</span></div>
+      <div class="card"><h3><i class="fas fa-network-wired"></i> Nginx</h3><p>Single entry point (port 80). Routes <code>/ →</code> frontend, <code>/api/ →</code> backend.</p><span class="badge blue mt-8">Port 80</span></div>
+    </div>
+    <div class="state-row mt-16" style="justify-content:center">
+      <span class="state-badge"><i class="fas fa-check-circle" style="color:#34d399"></i> Create</span>
+      <span class="state-badge"><i class="fas fa-check-circle" style="color:#34d399"></i> Read</span>
+      <span class="state-badge"><i class="fas fa-check-circle" style="color:#34d399"></i> Update</span>
+      <span class="state-badge"><i class="fas fa-check-circle" style="color:#34d399"></i> Delete</span>
+      <span class="state-badge"><i class="fas fa-check-circle" style="color:#34d399"></i> Persist</span>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 3: Folder Structure -->
+<div class="slide" data-index="2">
+  <div class="slide-content">
+    <h2><i class="fas fa-folder-tree" style="color:#60a5fa;margin-right:10px"></i> Project Folder Structure</h2>
+    <p class="subtitle">Every file has a purpose — no clutter</p>
+    <div class="grid-2 mt-16">
+      <div class="diagram" style="font-size:.78rem;line-height:1.5">
+Docker_Mini_Project/
+├── <span class="hl">.env</span>
+├── <span class="hl">docker-compose.yml</span>
+├── README.md
+│
+├── <span class="hl2">backend/</span>
+│   ├── Dockerfile
+│   ├── requirements.txt
+│   ├── config.py
+│   └── <span class="hl">app.py</span>
+│
+├── <span class="hl2">frontend/</span>
+│   ├── Dockerfile
+│   ├── package.json
+│   ├── next.config.js
+│   └── pages/
+│       └── <span class="hl">index.js</span>
+│
+└── <span class="hl2">nginx/</span>
+    ├── Dockerfile
+    └── <span class="hl">default.conf</span>
+      </div>
+      <div>
+        <div class="card" style="margin-bottom:10px"><h3><i class="fas fa-file-alt"></i> .env</h3><p class="small-text">DB credentials — the secret locker</p><span class="badge amber mt-8">DB_NAME, DB_USER, DB_PASSWORD</span></div>
+        <div class="card" style="margin-bottom:10px"><h3><i class="fas fa-cogs"></i> docker-compose.yml</h3><p class="small-text">Orchestrates all 4 services, volumes, and network</p></div>
+        <div class="card"><h3><i class="fas fa-code-branch"></i> 3 Dockerfiles</h3><p class="small-text">One for each service: Python, Node.js, Nginx</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 4: Architecture -->
+<div class="slide" data-index="3">
+  <div class="slide-content">
+    <h2><i class="fas fa-sitemap" style="color:#60a5fa;margin-right:10px"></i> Architecture Overview</h2>
+    <p class="subtitle">How the 4 containers communicate — step by step</p>
+    <div style="display:flex;flex-direction:column;align-items:center;margin-top:12px">
+
+      <!-- User -->
+      <div class="arch-box" style="border-color:#6366f1;background:#0f172a;min-width:170px">
+        <div class="icon" style="color:#818cf8"><i class="fas fa-user"></i></div>
+        <div class="label" style="color:#e2e8f0">You (Browser)</div>
+        <div class="port"><i class="fas fa-globe"></i> http://localhost</div>
+      </div>
+
+      <div class="arch-arrow active"><i class="fas fa-arrow-down"></i></div>
+
+      <!-- Nginx -->
+      <div class="arch-box nginx" style="min-width:170px">
+        <div class="icon"><i class="fas fa-exchange-alt"></i></div>
+        <div class="label">Nginx</div>
+        <div class="port"><i class="fas fa-plug"></i> Port 80</div>
+        <div class="arch-sublabel"><i class="fas fa-route"></i> Reverse Proxy</div>
+      </div>
+
+      <div class="arch-line"></div>
+
+      <!-- Split row with bracket -->
+      <div style="display:flex;align-items:flex-start;gap:0;position:relative;padding:0 20px">
+        <div style="position:absolute;left:-6px;top:10px;color:#1e293b;font-size:2rem;font-weight:100;font-family:serif">&#123;</div>
+        <div style="position:absolute;right:-6px;top:10px;color:#1e293b;font-size:2rem;font-weight:100;font-family:serif">&#125;</div>
+
+        <div style="display:flex;gap:28px;padding:8px 16px;position:relative">
+
+          <!-- Left: Frontend -->
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+            <div class="arch-box frontend" style="min-width:155px">
+              <div class="icon"><i class="fab fa-react"></i></div>
+              <div class="label">Frontend</div>
+              <div class="port"><i class="fas fa-plug"></i> Port 3000</div>
+              <div class="arch-sublabel">Next.js + React</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px">
+              <span class="arch-arrow active" style="transform:rotate(-45deg);display:inline-block"><i class="fas fa-arrow-right"></i></span>
+              <span style="font-size:.72rem;color:#34d399;font-family:'JetBrains Mono',monospace">Serves UI</span>
+            </div>
+          </div>
+
+          <!-- Right: Backend + DB -->
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+            <div class="arch-box backend" style="min-width:155px">
+              <div class="icon"><i class="fas fa-bolt"></i></div>
+              <div class="label">Backend API</div>
+              <div class="port"><i class="fas fa-plug"></i> Port 5000</div>
+              <div class="arch-sublabel">FastAPI + Python</div>
+            </div>
+            <div class="arch-arrow active" style="transform:rotate(0)"><i class="fas fa-arrow-down"></i></div>
+            <div class="arch-box db" style="min-width:155px">
+              <div class="icon"><i class="fas fa-database"></i></div>
+              <div class="label">PostgreSQL</div>
+              <div class="port"><i class="fas fa-plug"></i> Port 5432</div>
+              <div class="arch-sublabel"><i class="fas fa-hard-drive"></i> Persistent Volume</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div style="display:flex;gap:16px;margin-top:6px;align-items:center">
+        <div style="display:flex;align-items:center;gap:6px">
+          <span class="arch-arrow active" style="transform:rotate(90deg);display:inline-block"><i class="fas fa-arrow-right"></i></span>
+          <span style="font-size:.72rem;color:#60a5fa;font-family:'JetBrains Mono',monospace">/ → Frontend</span>
+        </div>
+        <span style="color:#1e293b">|</span>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span class="arch-arrow active" style="transform:rotate(90deg);display:inline-block"><i class="fas fa-arrow-right"></i></span>
+          <span style="font-size:.72rem;color:#fbbf24;font-family:'JetBrains Mono',monospace">/api/ → Backend</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Slide 5: Services Deep Dive -->
+<div class="slide" data-index="4">
+  <div class="slide-content">
+    <h2><i class="fas fa-chevron-circle-right" style="color:#60a5fa;margin-right:10px"></i> Services Deep Dive</h2>
+    <div class="grid-2 mt-16">
+      <div class="card"><h3><i class="fab fa-react" style="color:#60a5fa"></i> Frontend</h3>
+        <p class="small-text">Next.js 14 + React 18 with hooks (<code>useState</code>, <code>useEffect</code>)</p>
+        <ul class="mt-8 small-text">
+          <li>Single-page employee table + form UI</li>
+          <li>Makes <code>fetch()</code> calls to <code>localhost:5000/api</code></li>
+          <li>Port <span class="badge">3000</span></li>
+        </ul>
+      </div>
+      <div class="card"><h3><i class="fas fa-bolt" style="color:#fbbf24"></i> Backend</h3>
+        <p class="small-text">FastAPI + psycopg2, auto-generates DB docs via OpenAPI</p>
+        <ul class="mt-8 small-text">
+          <li>5 CRUD endpoints + health check</li>
+          <li>Parameterized queries (<code>%s</code>) prevent SQL injection</li>
+          <li>Port <span class="badge">5000</span></li>
+        </ul>
+      </div>
+      <div class="card"><h3><i class="fas fa-database" style="color:#34d399"></i> PostgreSQL</h3>
+        <p class="small-text">16-alpine with persistent volume</p>
+        <ul class="mt-8 small-text">
+          <li><code>employees</code> table with 7 columns</li>
+          <li><code>SERIAL</code> primary key, <code>UNIQUE</code> email</li>
+          <li>Port <span class="badge">5432</span></li>
+        </ul>
+      </div>
+      <div class="card"><h3><i class="fas fa-exchange-alt" style="color:#a78bfa"></i> Nginx</h3>
+        <p class="small-text">Alpine-based, reverse proxy</p>
+        <ul class="mt-8 small-text">
+          <li><code>/api/</code> → backend <span class="badge green">:5000</span></li>
+          <li><code>/</code> → frontend <span class="badge green">:3000</span></li>
+          <li>Port <span class="badge">80</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 6: Backend API Endpoints -->
+<div class="slide" data-index="5">
+  <div class="slide-content">
+    <h2><i class="fas fa-list-ul" style="color:#60a5fa;margin-right:10px"></i> API Endpoints</h2>
+    <p class="subtitle">5 REST endpoints = full CRUD</p>
+    <div class="table-wrap mt-16">
+      <table>
+        <thead><tr><th>Method</th><th>Route</th><th>Description</th><th>SQL</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge green">GET</span></td><td><code>/api/employees</code></td><td>List all employees</td><td><code>SELECT</code></td></tr>
+          <tr><td><span class="badge green">GET</span></td><td><code>/api/employees/{id}</code></td><td>Get one employee</td><td><code>SELECT WHERE</code></td></tr>
+          <tr><td><span class="badge amber">POST</span></td><td><code>/api/employees</code></td><td>Create new employee</td><td><code>INSERT RETURNING *</code></td></tr>
+          <tr><td><span class="badge blue">PUT</span></td><td><code>/api/employees/{id}</code></td><td>Update employee</td><td><code>UPDATE RETURNING *</code></td></tr>
+          <tr><td><span class="badge" style="color:#f87171;border-color:#7f1d1d">DELETE</span></td><td><code>/api/employees/{id}</code></td><td>Delete employee</td><td><code>DELETE</code></td></tr>
+          <tr><td><span class="badge green">GET</span></td><td><code>/api/health</code></td><td>Health check</td><td><code>—</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="grid-2 mt-16">
+      <div class="card"><h3><i class="fas fa-shield-alt" style="color:#34d399"></i> SQL Injection Protection</h3><p class="small-text">Using <code>%s</code> placeholders — the fence between code and data</p></div>
+      <div class="card"><h3><i class="fas fa-share-alt" style="color:#60a5fa"></i> CORS Enabled</h3><p class="small-text">Browser's security guard told: "Let frontend talk to backend"</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 7: Docker Compose Config -->
+<div class="slide" data-index="6">
+  <div class="slide-content">
+    <h2><i class="fas fa-file-code" style="color:#60a5fa;margin-right:10px"></i> Docker Compose Configuration</h2>
+    <p class="subtitle">4 services, 1 volume, 1 network — 1 file</p>
+    <div class="grid-2 mt-16">
+      <pre style="margin:0;font-size:.72rem;line-height:1.4"><code><span class="hl">version: "3.8"</span>
+services:
+  <span class="hl2">db</span>:
+    image: postgres:16-alpine
+    volumes: [postgres_data:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
+  <span class="hl2">backend</span>:
+    build: ./backend
+    depends_on:
+      db: { condition: service_healthy }
+  <span class="hl2">frontend</span>:
+    build: ./frontend
+    ports: ["3000:3000"]
+  <span class="hl2">nginx</span>:
+    build: ./nginx
+    ports: ["80:80"]
+volumes: { postgres_data: }
+networks: { ems-network: { driver: bridge } }</code></pre>
+      <div>
+        <div class="card mb-8"><h3><i class="fas fa-heartbeat"></i> Health Check</h3><p class="small-text">"Call ahead to make sure the kitchen is open before placing the order." Backend waits for DB.</p></div>
+        <div class="card mb-8"><h3><i class="fas fa-layer-group"></i> depends_on</h3><p class="small-text">Start order: DB → Backend → Frontend → Nginx. Each waits for the previous.</p></div>
+        <div class="card"><h3><i class="fas fa-globe"></i> ems-network</h3><p class="small-text">All containers on one bridge network — they talk by <strong>service name</strong>, not IP.</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 8: How to Run -->
+<div class="slide" data-index="7">
+  <div class="slide-content">
+    <h2><i class="fas fa-play-circle" style="color:#34d399;margin-right:10px"></i> How to Run</h2>
+    <div class="grid-2 mt-16">
+      <div>
+        <pre style="margin:0"><code><span class="hl2"># Build &amp; start all services</span>
+docker-compose up --build
+
+<span class="hl2"># Open in browser</span>
+→ http://localhost
+
+<span class="hl2"># Stop everything</span>
+docker-compose down
+
+<span class="hl2"># Stop + delete DB data</span>
+docker-compose down -v</code></pre>
+      </div>
+      <div>
+        <h3 style="margin-bottom:8px"><i class="fas fa-binoculars"></i> Useful Commands</h3>
+        <div class="icon-list">
+          <li><i class="fas fa-terminal"></i><code>docker ps</code></li>
+          <li><i class="fas fa-database"></i><code>docker volume ls</code></li>
+          <li><i class="fas fa-network-wired"></i><code>docker network ls</code></li>
+          <li><i class="fas fa-file-alt"></i><code>docker logs employee-backend</code></li>
+          <li><i class="fas fa-file-alt"></i><code>docker logs employee-frontend</code></li>
+          <li><i class="fas fa-file-alt"></i><code>docker logs employee-db</code></li>
+          <li><i class="fas fa-file-alt"></i><code>docker logs employee-nginx</code></li>
+        </div>
+      </div>
+    </div>
+    <div class="card mt-16" style="background:#0f172a;border-color:#1e3a5f">
+      <h3><i class="fas fa-rocket" style="color:#60a5fa"></i> Try It Yourself</h3>
+      <p class="small-text">Open <strong>http://localhost</strong> → Add employees → Edit → Delete → Refresh (data persists!) → <code>docker-compose down</code> → <code>docker-compose up</code> (data still there!)</p>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 9: Data Flow -->
+<div class="slide" data-index="8">
+  <div class="slide-content">
+    <h2><i class="fas fa-exchange-alt" style="color:#60a5fa;margin-right:10px"></i> How It All Connects</h2>
+    <div class="grid-2 mt-16">
+      <div>
+        <h3><i class="fas fa-arrow-right" style="color:#34d399"></i> Page Load</h3>
+        <ol style="list-style:none;counter-reset:step">
+          <li style="counter-increment:step;padding-left:28px;margin-bottom:8px"><span style="position:absolute;left:0;color:#60a5fa;font-weight:700">1.</span> Browser → Nginx (port 80)</li>
+          <li style="counter-increment:step;padding-left:28px;margin-bottom:8px"><span style="position:absolute;left:0;color:#60a5fa;font-weight:700">2.</span> Nginx → Frontend (port 3000)</li>
+          <li style="counter-increment:step;padding-left:28px;margin-bottom:8px"><span style="position:absolute;left:0;color:#60a5fa;font-weight:700">3.</span> React page loads → JS runs</li>
+          <li style="counter-increment:step;padding-left:28px;margin-bottom:8px"><span style="position:absolute;left:0;color:#60a5fa;font-weight:700">4.</span> JS → <code>localhost:5000/api/employees</code></li>
+          <li style="counter-increment:step;padding-left:28px;margin-bottom:8px"><span style="position:absolute;left:0;color:#60a5fa;font-weight:700">5.</span> Backend → PostgreSQL → returns data</li>
+          <li style="counter-increment:step;padding-left:28px;margin-bottom:8px"><span style="position:absolute;left:0;color:#60a5fa;font-weight:700">6.</span> JSON back to browser → table renders</li>
+        </ol>
+      </div>
+      <div>
+        <h3><i class="fas fa-plus-circle" style="color:#34d399"></i> Add Employee</h3>
+        <ol style="list-style:none;counter-reset:step2">
+          <li style="counter-increment:step2;padding-left:28px;margin-bottom:8px"><span style="position:absolute;left:0;color:#fbbf24;font-weight:700">1.</span> Fill form → click "Add"</li>
+          <li style="counter-increment:step2;padding-left:28px;margin-bottom:8px"><span style="position:absolute;left:0;color:#fbbf24;font-weight:700">2.</span> POST with JSON body</li>
+          <li style="counter-increment:step2;padding-left:28px;margin-bottom:8px"><span style="position:absolute;left:0;color:#fbbf24;font-weight:700">3.</span> Backend validates</li>
+          <li style="counter-increment:step2;padding-left:28px;margin-bottom:8px"><span style="position:absolute;left:0;color:#fbbf24;font-weight:700">4.</span> <code>INSERT ... RETURNING *</code></li>
+          <li style="counter-increment:step2;padding-left:28px;margin-bottom:8px"><span style="position:absolute;left:0;color:#fbbf24;font-weight:700">5.</span> Returns 201 + new record</li>
+          <li style="counter-increment:step2;padding-left:28px;margin-bottom:8px"><span style="position:absolute;left:0;color:#fbbf24;font-weight:700">6.</span> Toast + re-fetch → table updates</li>
+        </ol>
+      </div>
+    </div>
+    <div class="card mt-16" style="text-align:center;background:#0f172a;border-color:#1e293b">
+      <p class="medium-text"><i class="fas fa-check-circle" style="color:#34d399;margin-right:6px"></i> End-to-end: Browser → Nginx → Frontend → API → Backend → DB → Response full circle</p>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 10: Key Takeaways -->
+<div class="slide" data-index="9">
+  <div class="slide-content">
+    <h2><i class="fas fa-trophy" style="color:#fbbf24;margin-right:10px"></i> Key Takeaways</h2>
+    <div class="grid-2 mt-16">
+      <div class="card" style="text-align:center"><i class="fas fa-file-code" style="font-size:1.4rem;color:#60a5fa;margin-bottom:6px;display:block"></i><span class="badge blue" style="margin-bottom:6px">Dockerfile</span><p class="small-text">3 Dockerfiles — recipe cards for each service</p></div>
+      <div class="card" style="text-align:center"><i class="fas fa-cogs" style="font-size:1.4rem;color:#60a5fa;margin-bottom:6px;display:block"></i><span class="badge blue" style="margin-bottom:6px">Docker Compose</span><p class="small-text">4 services defined in one YAML file</p></div>
+      <div class="card" style="text-align:center"><i class="fas fa-network-wired" style="font-size:1.4rem;color:#34d399;margin-bottom:6px;display:block"></i><span class="badge green" style="margin-bottom:6px">Networking</span><p class="small-text">Containers talk by service name on ems-network</p></div>
+      <div class="card" style="text-align:center"><i class="fas fa-exchange-alt" style="font-size:1.4rem;color:#34d399;margin-bottom:6px;display:block"></i><span class="badge green" style="margin-bottom:6px">Reverse Proxy</span><p class="small-text">Nginx routes /api/ → backend, / → frontend</p></div>
+      <div class="card" style="text-align:center"><i class="fas fa-database" style="font-size:1.4rem;color:#fbbf24;margin-bottom:6px;display:block"></i><span class="badge amber" style="margin-bottom:6px">Volumes</span><p class="small-text">postgres_data persists DB across restarts</p></div>
+      <div class="card" style="text-align:center"><i class="fas fa-shield-alt" style="font-size:1.4rem;color:#fbbf24;margin-bottom:6px;display:block"></i><span class="badge amber" style="margin-bottom:6px">Security</span><p class="small-text">%s placeholders prevent SQL injection</p></div>
+      <div class="card" style="text-align:center"><i class="fas fa-play" style="font-size:1.4rem;color:#a78bfa;margin-bottom:6px;display:block"></i><span class="badge" style="border-color:#a78bfa;color:#a78bfa;margin-bottom:6px">One Command</span><p class="small-text">docker-compose up --build starts everything</p></div>
+      <div class="card" style="text-align:center"><i class="fas fa-heartbeat" style="font-size:1.4rem;color:#a78bfa;margin-bottom:6px;display:block"></i><span class="badge" style="border-color:#a78bfa;color:#a78bfa;margin-bottom:6px">Health Checks</span><p class="small-text">Backend waits for DB before accepting requests</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 11: Closing -->
+<div class="slide" data-index="10">
+  <div class="slide-content" style="text-align:center">
+    <div style="font-size:3rem;margin-bottom:16px"><i class="fas fa-docker" style="color:#60a5fa"></i></div>
+    <h1 class="title-gradient" style="font-size:2.2rem">"One command to start,<br>all services connected, data persisted<br>— that is the power of Docker Compose."</h1>
+    <p class="subtitle mt-16" style="font-size:1.05rem">4 different technologies (Next.js, FastAPI, PostgreSQL, Nginx), 4 containers, 1 command.</p>
+    <div class="state-row flex-center gap-12 mt-24" style="justify-content:center">
+      <span class="state-badge"><i class="fas fa-star" style="color:#fbbf24"></i> Frontend</span>
+      <span class="state-badge"><i class="fas fa-star" style="color:#fbbf24"></i> Backend</span>
+      <span class="state-badge"><i class="fas fa-star" style="color:#fbbf24"></i> Database</span>
+      <span class="state-badge"><i class="fas fa-star" style="color:#fbbf24"></i> Proxy</span>
+    </div>
+    <p class="small-text mt-24" style="color:#475569">docker-compose up --build <span style="color:#334155;margin:0 8px">•</span> http://localhost <span style="color:#334155;margin:0 8px">•</span> docker-compose down</p>
+  </div>
+</div>
+
+</div>
+
+<nav class="navbar">
+  <button class="nav-btn" id="prevBtn" disabled><i class="fas fa-chevron-left"></i> Prev</button>
+  <span class="counter" id="counter">Slide 1 of 11</span>
+  <button class="nav-btn" id="nextBtn">Next <i class="fas fa-chevron-right"></i></button>
+</nav>
+
+<script>
+(function(){
+  const slides = document.querySelectorAll('.slide');
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const counter = document.getElementById('counter');
+  let current = 0;
+  const total = slides.length;
+
+  const reflow = el => void el.offsetHeight;
+
+  function goTo(idx) {
+    if (idx < 0) idx = 0;
+    if (idx >= total) idx = total - 1;
+    if (idx === current) return;
+    slides.forEach(s => { s.classList.remove('active','animate'); });
+    const target = slides[idx];
+    target.classList.add('active');
+    reflow(target);
+    target.classList.add('animate');
+    current = idx;
+    counter.textContent = `Slide ${current+1} of ${total}`;
+    prevBtn.disabled = current === 0;
+    nextBtn.disabled = current === total - 1;
+  }
+
+  prevBtn.addEventListener('click', () => goTo(current - 1));
+  nextBtn.addEventListener('click', () => goTo(current + 1));
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); goTo(current + 1); }
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); goTo(current - 1); }
+  });
+
+  slides.forEach((s, i) => {
+    if (i === 0) { s.classList.add('active'); reflow(s); setTimeout(() => s.classList.add('animate'), 100); }
+    else s.classList.remove('active');
+  });
+
+  counter.textContent = `Slide 1 of ${total}`;
+  prevBtn.disabled = true;
+})();
+</script>
+</body>
+</html>

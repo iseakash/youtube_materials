@@ -1,0 +1,72 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: employee-db
+    restart: unless-stopped       # To automatically restart a container crashes due to an error, it stays dead until you manually run a command to fix it
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "5432:5432"               # The port on which the PostgreSQL server is listening inside the container. The default port for PostgreSQL is 5432.
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"] # Check if the PostgreSQL server is ready to accept connections
+      interval: 10s
+      retries: 5
+      start_period: 30s
+    networks:
+      - ems-network
+
+  backend:
+    build: ./backend
+    container_name: employee-backend
+    restart: unless-stopped
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432                   # The port on which the PostgreSQL server is listening inside the container. The default port for PostgreSQL is 5432.
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "5000:5000"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - ems-network
+
+  frontend:
+    build: ./frontend
+    container_name: employee-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - ems-network
+
+  nginx:
+    build: ./nginx
+    container_name: employee-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"             # The port on which the Nginx server is listening inside the container. The default port for HTTP is 80.
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - ems-network
+
+volumes:
+  postgres_data:
+
+# Docker uses the network to run an internal DNS server.
+# This allows containers to talk to each other using their service names instead of unstable IP addresses.
+networks:
+  ems-network:
+    driver: bridge
