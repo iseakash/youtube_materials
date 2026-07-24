@@ -1,4 +1,4 @@
-# 20 FastAPI Real-World Tasks
+# 20 FastAPI Real-World Use Cases
 
 ## General instructions
 
