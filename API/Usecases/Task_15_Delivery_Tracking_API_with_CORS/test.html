@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Delivery Tracking CORS Test</title>
+</head>
+<body>
+
+    <h1>Delivery Tracking CORS Test</h1>
+
+    <p>API Server: http://127.0.0.1:8000</p>
+    <p>Your Origin: <span id="origin"></span></p>
+
+    <button onclick="getTracking()">
+        GET /tracking/TKT001
+    </button>
+
+    <button onclick="patchTracking()">
+        PATCH /tracking/TKT001
+    </button>
+
+    <pre id="result"></pre>
+
+    <script>
+        const API = "http://127.0.0.1:8000";
+
+        document.getElementById("origin").textContent = window.location.origin;
+
+        async function getTracking() {
+            try {
+                const response = await fetch(
+                    API + "/tracking/TKT001"
+                );
+                const data = await response.json();
+                document.getElementById("result").textContent =
+                    JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById("result").textContent =
+                    error.message;
+            }
+        }
+
+        async function patchTracking() {
+            try {
+                const response = await fetch(
+                    API + "/tracking/TKT001",
+                    {
+                        method: "PATCH",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "X-Admin-Key": "admin-secret-key-2024"
+                        },
+                        body: JSON.stringify({
+                            status: "delivered"
+                        })
+                    }
+                );
+                const data = await response.json();
+                document.getElementById("result").textContent =
+                    JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById("result").textContent =
+                    error.message;
+            }
+        }
+    </script>
+
+</body>
+</html>
